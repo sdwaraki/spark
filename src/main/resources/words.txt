@@ -1,0 +1,10 @@
+In statistics, the logistic model (or logit model) is a statistical model that is usually taken to apply to a binary dependent variable. 
+In regression analysis, logistic regression or logit regression is estimating the parameters of a logistic model. 
+More formally, a logistic model is one where the log-odds of the probability of an event is a linear combination of independent or predictor variables.
+The two possible dependent variable values are often labelled as "0" and "1", which represent outcomes such as pass/fail, win/lose, alive/dead or healthy/sick. 
+The binary logistic regression model can be generalized to more than two levels of the dependent variable: categorical outputs with more than two values are modelled by multinomial logistic regression, and if the multiple categories are ordered, by ordinal logistic regression, for example the proportional odds ordinal logistic model.
+Logistic regression was developed by statistician David Cox in 1958.
+The binary logistic model is used to estimate the probability of a binary response based on one or more predictor (or independent) variables (features). 
+It allows one to say that the presence of a risk factor increases the odds of a given outcome by a specific factor. 
+The model itself simply models probability of output in terms of input, and does not perform statistical classification (it is not a classifier), though it can be used to make a classifier, for instance by choosing a cutoff value and classifying inputs with probability greater than the cutoff as one class, below the cutoff as the other. 
+The coefficients are generally not computed by a closed-form expression, unlike linear least squares; see § Model fitting.
