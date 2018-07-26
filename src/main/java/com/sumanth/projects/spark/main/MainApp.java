@@ -32,7 +32,7 @@ public class MainApp {
 		System.out.println("1. Counting the number of words in the text");
 		System.out.println(wordCount);
 		
-		//Map something from the RDD to something else - Just make sure that the function has a Input type and an output type to it...
+		//Map something from the RDD to something else 
 		JavaRDD<String> upperCaseTextFile = textFile.map(new Function<String, String>() {
 			@Override
 			public String call(String v1) throws Exception {
@@ -44,7 +44,7 @@ public class MainApp {
 		toUpperCasePrintFile.stream().forEach(System.out::print);
 		System.out.println();
 		
-		//Filter something in the RDD
+		//Filter something in the RDDs
 		JavaRDD<String> filterTextFile = textFile.filter(new Function<String, Boolean> () {
 
 			@Override
