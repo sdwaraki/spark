@@ -52,14 +52,14 @@ public class MainApp {
 				String[] splitStrings = v1.split(",");
 				if (splitStrings[0].equalsIgnoreCase("last_name")) {
 					return false;
-				} else if (Integer.parseInt(splitStrings[2]) > 200000) {
+				} else if (Integer.parseInt(splitStrings[2]) < 200000) {
 					return true;
 				} else {
 					return false;
 				}
 			}		
 		});
-		System.out.println("3. Filtering everything out whose salary is < 200k - Printing out count");
+		System.out.println("3. Filtering everything out whose salary is > 200k - Printing out count");
 		System.out.println(filterTextFile.count());
 	}
 }
