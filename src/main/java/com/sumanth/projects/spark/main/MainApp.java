@@ -10,6 +10,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.Function2;
 
 import com.sumanth.projects.spark.utils.SparkConnection;
 
@@ -61,5 +62,40 @@ public class MainApp {
 		});
 		System.out.println("3. Filtering everything out whose salary is > 200k - Printing out count");
 		System.out.println(filterTextFile.count());
+		
+		
+		//Reduce the RDDs to find the average of the salaries of the folks
+		String sum = textFile.reduce(new Function2<String, String, String>() {
+
+			@Override
+			public String call(String v1, String v2) throws Exception {
+				if (v1.contains("last_name")||v2.contains("last_name")) {
+					return Double.valueOf(0.0).toString();
+				}
+				else {
+					Double sal1 = isNumeric(getSalary(v1))? Double.valueOf(getSalary(v1)):0.0;
+					Double sal2 = isNumeric(getSalary(v2))? Double.valueOf(getSalary(v2)):0.0;
+					Double sum = sal1 + sal2;
+					return sum.toString();
+				}
+			}
+			
+			private String getSalary(String in) {
+				if (in.contains(",")) {
+					String vals[] = in.split(",");
+					return vals[2];
+				} else {
+					return Double.valueOf(0.0).toString();
+				}
+			}
+			
+			private boolean isNumeric(String s) {
+				return s.matches("[-+]?\\d*\\.?\\d+");
+			}
+			
+		});
+		
+		Double avgSal = Double.valueOf(sum)/(textFile.count()-1);
+		System.out.println("Avg salary is " + avgSal);
 	}
 }
