@@ -1,5 +1,6 @@
 package com.sumanth.projects.spark.main;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -35,6 +36,11 @@ public class MainApp {
 		
 		//Map something from the RDD to something else 
 		JavaRDD<String> upperCaseTextFile = textFile.map(new Function<String, String>() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public String call(String v1) throws Exception {
 				return v1.toUpperCase();
@@ -47,6 +53,11 @@ public class MainApp {
 		
 		//Filter something in the RDDs
 		JavaRDD<String> filterTextFile = textFile.filter(new Function<String, Boolean> () {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			public Boolean call(String v1) throws Exception {
@@ -63,39 +74,40 @@ public class MainApp {
 		System.out.println("3. Filtering everything out whose salary is > 200k - Printing out count");
 		System.out.println(filterTextFile.count());
 		
-		
 		//Reduce the RDDs to find the average of the salaries of the folks
 		String sum = textFile.reduce(new Function2<String, String, String>() {
 
 			@Override
 			public String call(String v1, String v2) throws Exception {
-				if (v1.contains("last_name")||v2.contains("last_name")) {
-					return Double.valueOf(0.0).toString();
-				}
-				else {
-					Double sal1 = isNumeric(getSalary(v1))? Double.valueOf(getSalary(v1)):0.0;
-					Double sal2 = isNumeric(getSalary(v2))? Double.valueOf(getSalary(v2)):0.0;
-					Double sum = sal1 + sal2;
+				if (v1.contains("last_name") || v2.contains("last_name")) {
+					return "0";
+				} else {
+					BigInteger sal1 = BigInteger.valueOf(getSalary(v1));
+					BigInteger sal2 = BigInteger.valueOf(getSalary(v2));
+					if (sal1.equals(BigInteger.valueOf(0l)) || sal2.equals(BigInteger.valueOf(0l))) {
+						System.out.println("val1=" + v1 + " val2=" + v2);
+						System.out.println("sal1=" + sal1 + " sal2=" + sal2);
+					}
+					BigInteger sum = sal1.add(sal2);
 					return sum.toString();
 				}
 			}
-			
-			private String getSalary(String in) {
+
+			private Long getSalary(String in) {
 				if (in.contains(",")) {
 					String vals[] = in.split(",");
-					return vals[2];
+					return Long.valueOf(vals[2]);
 				} else {
-					return Double.valueOf(0.0).toString();
+					return Long.valueOf(in);
 				}
 			}
-			
-			private boolean isNumeric(String s) {
-				return s.matches("[-+]?\\d*\\.?\\d+");
-			}
-			
+
 		});
 		
-		Double avgSal = Double.valueOf(sum)/(textFile.count()-1);
+		System.out.println("Total Salary: " + Long.valueOf(sum));
+		System.out.println("Total Employees: " + textFile.count());
+		Double avgSal = Double.valueOf(sum) / (textFile.count() - 1);
 		System.out.println("Avg salary is " + avgSal);
+		
 	}
 }
