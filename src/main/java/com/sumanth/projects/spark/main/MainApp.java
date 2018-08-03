@@ -2,12 +2,14 @@ package com.sumanth.projects.spark.main;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.AbstractJavaRDDLike;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -16,6 +18,7 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 
+import com.sumanth.projects.spark.utils.MinTupleFinder;
 import com.sumanth.projects.spark.utils.SparkConnection;
 
 import scala.Tuple2;
@@ -154,5 +157,10 @@ public class MainApp {
 		
 		List<Tuple2<String,BigInteger>>something = totalPrezSalary.take(40);
 		something.forEach(s -> System.out.println(s._1+" --- "+s._2));
+		
+	    Tuple2<String, BigInteger> min =  totalPrezSalary.min(new MinTupleFinder());
+	    
+	    
+	    System.out.println(min._1+ "...."+min._2);
 	}
 }
