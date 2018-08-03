@@ -8,12 +8,17 @@ import java.util.List;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
+import org.apache.spark.api.java.function.PairFunction;
 
 import com.sumanth.projects.spark.utils.SparkConnection;
+
+import scala.Tuple2;
 
 public class MainApp {
 
@@ -54,9 +59,6 @@ public class MainApp {
 		//Filter something in the RDDs
 		JavaRDD<String> filterTextFile = textFile.filter(new Function<String, Boolean> () {
 
-			/**
-			 * 
-			 */
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -84,10 +86,6 @@ public class MainApp {
 				} else {
 					BigInteger sal1 = BigInteger.valueOf(getSalary(v1));
 					BigInteger sal2 = BigInteger.valueOf(getSalary(v2));
-					if (sal1.equals(BigInteger.valueOf(0l)) || sal2.equals(BigInteger.valueOf(0l))) {
-						System.out.println("val1=" + v1 + " val2=" + v2);
-						System.out.println("sal1=" + sal1 + " sal2=" + sal2);
-					}
 					BigInteger sum = sal1.add(sal2);
 					return sum.toString();
 				}
@@ -109,5 +107,52 @@ public class MainApp {
 		Double avgSal = Double.valueOf(sum) / (textFile.count() - 1);
 		System.out.println("Avg salary is " + avgSal);
 		
+		
+		//Trying something with FlatMap - Flatmap takes an RDD of a certain type and spits out one or more things that can be used as a element of a collection. 
+		List<String> flatMapResult = textFile.flatMap(new FlatMapFunction<String, String>() {
+
+			@Override
+			public Iterator<String> call(String t) throws Exception {
+				String[] splitStrings = t.split(",");
+				return Arrays.asList(splitStrings).iterator();
+			}
+			
+		}).collect();
+		
+		System.out.println("Total number of words in the file is " + flatMapResult.size());
+		
+		//Using the Map Functions to emit tuples and reduce by key operation
+		JavaPairRDD<String, BigInteger> presidentSalary = textFile.filter(new Function<String, Boolean> () {
+
+			@Override
+			public Boolean call(String v1) throws Exception {
+				String[] splitStrings = v1.split(",");
+				if (splitStrings[4].contains("President")) {
+					return true;
+				}
+				return false;
+			}
+			
+		}).mapToPair(new PairFunction<String, String, BigInteger>() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Tuple2<String, BigInteger> call(String t) throws Exception {
+				String[] splitStrings = t.split(",");
+				return new Tuple2<String, BigInteger>(splitStrings[4], BigInteger.valueOf(Long.parseLong(splitStrings[2])));
+			}
+		});
+		
+		JavaPairRDD<String,BigInteger> totalPrezSalary = presidentSalary.reduceByKey(new Function2<BigInteger, BigInteger, BigInteger>() {
+
+			@Override
+			public BigInteger call(BigInteger v1, BigInteger v2) throws Exception {
+				return v1.add(v2);
+			}
+			
+		});
+		
+		List<Tuple2<String,BigInteger>>something = totalPrezSalary.take(40);
+		something.forEach(s -> System.out.println(s._1+" --- "+s._2));
 	}
 }
