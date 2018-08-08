@@ -38,7 +38,7 @@ public class MainSparkSQL {
 		// select count(*) from dataframe where asin='B0000000ZW'
 		Long something = reviewsDF.select().filter(col("asin").equalTo("B0000000ZW")).count();
 		System.out.println("The count is  " + something);
-
+		
 		Dataset<Row> updatedReviewsDF = reviewsDF.withColumn("year",
 				functions.split(col("reviewTime"), ", ").getItem(1).cast(DataTypes.IntegerType))
 				.withColumn("reviewTimeDayMonth", functions.split(col("reviewTime"), ", ").getItem(0));
