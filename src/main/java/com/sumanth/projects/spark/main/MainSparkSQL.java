@@ -28,8 +28,10 @@ public class MainSparkSQL {
 		Dataset<Row> reviewsDF = session.read().json("/Users/sumanth/Documents/workspace/reviews_Digital_Music_5.json");
 		reviewsDF.printSchema();
 
+		System.out.println("----Simple querying----");
+
 		// Show all but limit to 10
-		// reviewsDF.limit(10).show();
+		reviewsDF.limit(10).show();
 
 		// select asin,overall,reviewerId from dataframe where overall<4 limit 20
 		reviewsDF.select(col("asin"), col("overall"), col("reviewerID")).filter(col("overall").$less(4)).limit(20)
@@ -37,17 +39,28 @@ public class MainSparkSQL {
 
 		// select count(*) from dataframe where asin='B0000000ZW'
 		Long something = reviewsDF.select().filter(col("asin").equalTo("B0000000ZW")).count();
-		System.out.println("The count is  " + something);
-		
-		Dataset<Row> updatedReviewsDF = reviewsDF.withColumn("year",
-				functions.split(col("reviewTime"), ", ").getItem(1).cast(DataTypes.IntegerType))
+		System.out.println("The count of records with asin = B0000000ZW is  " + something);
+
+		// Data Manipulation and casting datatypes in dataset rows
+		System.out.println("----Data Manipulation----");
+		Dataset<Row> updatedReviewsDF = reviewsDF
+				.withColumn("year", functions.split(col("reviewTime"), ", ").getItem(1).cast(DataTypes.IntegerType))
 				.withColumn("reviewTimeDayMonth", functions.split(col("reviewTime"), ", ").getItem(0));
-		Dataset<Row> tempReviewsDF = updatedReviewsDF.withColumn("month",
-				functions.ltrim(functions.split(col("reviewTimeDayMonth"), " ").getItem(0)).cast(DataTypes.IntegerType))
-				.withColumn("day",functions.split(col("reviewTimeDayMonth"), " ").getItem(1).cast(DataTypes.IntegerType));
-		Dataset<Row> reviewsDF2 = tempReviewsDF.drop(col("reviewTime")).drop(col("reviewTimeDayMonth"));
+		Dataset<Row> tempReviewsDF = updatedReviewsDF
+				.withColumn("month",
+						functions.ltrim(functions.split(col("reviewTimeDayMonth"), " ").getItem(0))
+								.cast(DataTypes.IntegerType))
+				.withColumn("day",
+						functions.split(col("reviewTimeDayMonth"), " ").getItem(1).cast(DataTypes.IntegerType));
+		Dataset<Row> reviewsDF2 = tempReviewsDF.drop(col("reviewTime")).drop(col("reviewTimeDayMonth"))
+				.drop(col("helpful"));
 		reviewsDF2.limit(10).show();
 
+		// spark temp tables
+		System.out.println("----SQL TEMP VIEWS----");
+		reviewsDF2.createOrReplaceTempView("reviews");
+		session.sql(
+				"select count(*) as reviewCount,asin from reviews where year>2003 group by asin having reviewCount>20 order by reviewCount desc")
+				.show();
 	}
-
 }
