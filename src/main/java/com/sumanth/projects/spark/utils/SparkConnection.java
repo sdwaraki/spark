@@ -13,7 +13,7 @@ public class SparkConnection {
 	public static void getConnection() {
 		if (javaSparkContext == null) {
 			conf = new SparkConf().setMaster("local").setAppName("local");
-			javaSparkContext = new JavaSparkContext(getSparkConf());
+			javaSparkContext = new JavaSparkContext(conf);
 			sparkSession = SparkSession.builder().appName("local").master("local").config("spark.sql.warehouse.dir",
 					"file:/Users/sumanth/Documents/workspace/spark/src/main/resources/temp").getOrCreate();
 		}
